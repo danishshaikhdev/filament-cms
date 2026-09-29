@@ -22,12 +22,13 @@
     ],
     "require": {
         "php": "^8.2",
+        "bezhansalleh/filament-shield": "^3.3",
         "doctrine/dbal": "^3.5.1",
         "filament/filament": "^3.0",
         "filament/forms": "^3.0",
         "filament/tables": "^3.0",
-        "spatie/laravel-package-tools": "^1.15.0",
-        "illuminate/contracts": "^10.0"
+        "illuminate/contracts": "^10.0",
+        "spatie/laravel-package-tools": "^1.15.0"
     },
     "require-dev": {
         "laravel/pint": "^1.0",

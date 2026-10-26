@@ -1,5 +1,50 @@
 # Upgrade Guide
 
+## Blog (CMS-11)
+
+Run the new migration (it creates `blog_posts`) and create the blog permissions. Both
+default roles get them; custom roles need `*_post` granted on the Roles screen:
+
+```bash
+php artisan migrate
+php artisan filament-cms:roles
+```
+
+If you published `config/filament-cms.php`, copy the new `blog` section from the package
+config, then turn the frontend routes on with `FILAMENT_CMS_BLOG_ROUTES=true`
+([blog](docs/blog.md)). Nothing else changes for existing pages.
+
+## Fixed navigations and static items (CMS-10)
+
+**Only Main Menu and Footer Menu.** The panel creates `main-menu` and `footer-menu` when
+Navigations is opened and no longer lets admins create or delete navigations. Existing
+navigations with those keys (or those names and no key) are kept as they are. To use other
+keys, set `navigations` in `config/filament-cms.php`:
+
+```php
+'navigations' => [
+    'main-menu' => 'Main Menu',
+    'footer-menu' => 'Footer Menu',
+],
+```
+
+**Static items are no longer links.** `$item->url` is now `null` for `static` items (it was
+`url($slug)`). Check the new `$item->is_link` and render plain text when it is `false`:
+
+```blade
+@if ($item->is_link)
+    <a href="{{ $item->url }}">{{ $item->title }}</a>
+@else
+    <span>{{ $item->title }}</span>
+@endif
+```
+
+To keep the old behaviour, add to `AppServiceProvider::boot()`:
+
+```php
+NavigationItem::resolveUrlUsing('static', fn (NavigationItem $item) => url($item->slug));
+```
+
 ## Child navigation item icons (CMS-8)
 
 Run the new migration after updating. It adds a nullable `icon` column to `navigation_items`;
@@ -128,7 +173,7 @@ FilamentCms::getMenu('main-menu'); // the old display-name lookup still works
 @endforeach
 ```
 
-Static items link to `url($slug)` by default. Override any type with
+Static items are plain labels (`url` is `null`, see CMS-10 above). Override any type with
 `NavigationItem::resolveUrlUsing('static', fn ($item) => route($item->slug))`.
 
 **4. Stop querying package models directly** (e.g. in a `HomeController`):
